@@ -7,22 +7,21 @@ FuncDecl::FuncDecl(string name,
     unique_ptr<TypeExpr> outp) : name(std::move(name)),
         params(std::move(param)), outp(std::move(outp)) {
 }
-
-TypeConst::TypeConst(string name) : TypeExpr(TypeExprType::TYPE_CONST), name(std::move(name)) {
+/*
+TypeConst::TypeConst(string n) : TypeExpr(TypeExprType::TYPE_CONST), name(n) {
 }
 
-void TypeExpr::accept(ASTVisitor &visitor) {
+void TypeConst::accept(ASTVisitor &visitor) {
 }
 
 string TypeConst::toString() {
 	return name;
 }
-/*
-unique_ptr<TypeExpr> TypeExpr::clone() {
+
+unique_ptr<TypeExpr> TypeConst::clone() {
     return make_unique<TypeConst>(typeExprType);
 }
 */
-
 FuncType::FuncType(vector<unique_ptr<TypeExpr>> params,
     unique_ptr<TypeExpr> returnType)
     : TypeExpr(TypeExprType::FUNC_TYPE), params(std::move(params)),

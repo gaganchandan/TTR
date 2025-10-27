@@ -77,6 +77,7 @@ public:
 };
 
 // Type Expressions
+/*
 class TypeConst : public TypeExpr
 {
 public:
@@ -87,6 +88,7 @@ public:
     unique_ptr<TypeExpr> clone() override;
     virtual string toString();
 };
+*/
 
 class FuncType : public TypeExpr
 {
@@ -144,7 +146,7 @@ public:
     virtual ~Decl() = default;
     virtual void accept(ASTVisitor &);
     Decl( Decl &);
-    virtual unique_ptr<Decl> clone();
+//    virtual unique_ptr<Decl> clone();
 };
 
 // Expressions
