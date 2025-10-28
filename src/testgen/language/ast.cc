@@ -128,7 +128,7 @@ unique_ptr<Expr> Var::clone() const {
 }
 
 FuncCall::FuncCall(string name, vector<unique_ptr<Expr>> args)
-    : Expr(ExprType::FUNCTIONCALL_EXPR),
+    : Expr(ExprType::FUNCCALL),
       name(std::move(name)), args(std::move(args)) {
 }
 
@@ -261,10 +261,10 @@ Spec::Spec(vector<unique_ptr<Decl>> globals,
 void Spec::accept(ASTVisitor &visitor) {
 }
 
-Stmt::Stmt(StatementType type) : statementType(type) {}
+Stmt::Stmt(StmtType type) : statementType(type) {}
 
 Assign::Assign(unique_ptr<Var> left, unique_ptr<Expr> right)
-    : Stmt(StatementType::ASSIGN), left(std::move(left)), right(std::move(right)) {}
+    : Stmt(StmtType::ASSIGN), left(std::move(left)), right(std::move(right)) {}
 
 void Assign::accept(ASTVisitor &visitor) {
 }
@@ -287,7 +287,7 @@ unique_ptr<Stmt> Assign::clone() const {
 }
 
 FuncCallStmt::FuncCallStmt(unique_ptr<FuncCall> call)
-    : Stmt(StatementType::FUNCTIONCALL_STMT), call(std::move(call)) {}
+    : Stmt(StmtType::FUNCTIONCALL_STMT), call(std::move(call)) {}
 
 void FuncCallStmt::accept(ASTVisitor &visitor) {
 }

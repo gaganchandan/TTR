@@ -24,15 +24,15 @@ enum class HTTPResponseCode
 
 enum class ExprType
 {
+    FUNCCALL,
     MAP,
-    VAR,
-    STRING,
     NUM,
-    TUPLE,
+    POLYFUNCCALL,
     SET,
-    FUNCTIONCALL_EXPR,
-    POLYMORPHIC_FUNCTIONCALL_EXPR,
-    SYMVAR
+    STRING,
+    SYMVAR,
+    TUPLE,
+    VAR
 };
 
 enum class TypeExprType
@@ -45,7 +45,7 @@ enum class TypeExprType
     TUPLE_TYPE
 };
 
-enum class StatementType
+enum class StmtType
 {
     ASSIGN,
     FUNCTIONCALL_STMT,
@@ -315,21 +315,21 @@ public:
 class Stmt
 {
 public:
-    StatementType statementType;
+    const StmtType statementType;
 public:
     virtual ~Stmt() = default;
     virtual void accept(ASTVisitor &) = 0;
     virtual unique_ptr<Stmt> clone() const = 0;
 protected:
-    Stmt(StatementType);
+    Stmt(StmtType);
 };
 
 // Assignment statement: l = r
 class Assign : public Stmt
 {
 public:
-    unique_ptr<Var> left;
-    unique_ptr<Expr> right;
+    const unique_ptr<Var> left;
+    const unique_ptr<Expr> right;
 public:
     Assign(unique_ptr<Var>, unique_ptr<Expr>);
     void accept(ASTVisitor &visitor)  override;
@@ -340,7 +340,7 @@ public:
 class FuncCallStmt : public Stmt
 {
 public:
-    unique_ptr<FuncCall> call;
+    const unique_ptr<FuncCall> call;
 public:
     explicit FuncCallStmt(unique_ptr<FuncCall>);
     void accept(ASTVisitor &visitor)  override;
@@ -351,7 +351,7 @@ public:
 class Program
 {
 public:
-    vector<unique_ptr<Stmt>> statements;
+    const vector<unique_ptr<Stmt>> statements;
 public:
     explicit Program(vector<unique_ptr<Stmt>>);
     void accept(ASTVisitor &);
