@@ -7,9 +7,9 @@
 using namespace std;
 template<typename T1, typename T2> class Env {
     protected:
-        map<T1 *, T2 *> table;
+        map<T1, T2 *> table;
         Env<T1, T2> *parent;
-
+    
     public:
         Env(Env<T1, T2> *parent);
         virtual Env<T1, T2> *getParent();
@@ -21,10 +21,40 @@ template<typename T1, typename T2> class Env {
         virtual ~Env();
 };
 
-class SymbolTable : public Env<string, TypeExpr> {
+class SymbolTable : public Env<string, Expr> {
     public:
         SymbolTable(SymbolTable *parent);
         virtual void print();
         virtual string keyToString(string *);
+};
+
+// ValueEnvironment: maps variable names (strings) to their symbolic/concrete values (Expr*)
+// Used during symbolic execution to track the value of each variable
+class ValueEnvironment : public Env<string, Expr> {
+    public:
+        ValueEnvironment(ValueEnvironment *parent = nullptr);
+        virtual void print();
+        virtual string keyToString(string *);
+        
+        // Value environment methods
+        void setValue(const string& varName, Expr* value);
+        Expr* getValue(const string& varName);
+        bool hasValue(const string& varName);
+        map<string, Expr*>& getTable() { return table; }
+};
+
+// ConcValEnv: maps variable names (strings) to their symbolic/concrete values (Expr*)
+// Used during symbolic execution to track the value of each variable
+class ConcValEnv : public Env<string, Expr> {
+    public:
+        ConcValEnv(ConcValEnv *parent = nullptr);
+        virtual void print();
+        virtual string keyToString(string *);
+        
+        // Value environment methods
+        void setValue(const string& varName, Expr* value);
+        Expr* getValue(const string& varName);
+        bool hasValue(const string& varName);
+        map<string, Expr*>& getTable() { return table; }
 };
 

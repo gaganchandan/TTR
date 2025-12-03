@@ -5,7 +5,7 @@
 #include<memory>
 #include<string>
 
-#include "ast.hh"
+#include "../language/ast.hh"
 
 using namespace std;
 
@@ -18,6 +18,7 @@ class ResultValue {
     public:
         const ResultType type;
         ResultValue(ResultType);
+        virtual ~ResultValue() = default;
 };
 
 class BoolResultValue : public ResultValue {

@@ -1,5 +1,8 @@
 #pragma once
 #include <iostream>
+#include <stdexcept>
+#include <string>
+
 // Forward declarations
 class TypeConst;
 class FuncType;
@@ -26,64 +29,49 @@ class Spec;
 
 class Stmt;
 class Assign;
-class FuncCallStmt;
+class Assume;
 
 class Program;
 
-class ExprVisitor
-{
-public:
-    virtual ~ExprVisitor() = default;
-    // Expression visitors
-    virtual void visit(const Var &node) = 0;
-    virtual void visit(const FuncCall &node) = 0;
-    virtual void visit(const Num &node) = 0;
-    virtual void visit(const String &node) = 0;
-    virtual void visit(const Set &node) = 0;
-    virtual void visit(const Map &node) = 0;
-    virtual void visit(const Tuple &node) = 0;
-    // virtual void visit(const PolymorphicFuncCall &node) = 0;
-};
-
+// Base visitor with centralized dispatch logic (similar to Java Visitor pattern)
 class ASTVisitor
 {
 public:
     virtual ~ASTVisitor() = default;
 
-    // Type Expression visitors
-    virtual void visit(const TypeConst &node) = 0;
-    virtual void visit(const FuncType &node) = 0;
-    virtual void visit(const MapType &node) = 0;
-    virtual void visit(const TupleType &node) = 0;
-    virtual void visit(const SetType &node) = 0;
+    // Centralized visit method that dispatches to specific handlers
+    // This is the main entry point for visiting any node
+    void visit(const TypeExpr* node);
+    void visit(const Expr* node);
+    void visit(const Stmt* node);
 
-    // Expression visitors
-    virtual void visit(const Var &node) = 0;
-    virtual void visit(const FuncCall &node) = 0;
-    virtual void visit(const Num &node) = 0;
-    virtual void visit(const String &node) = 0;
-    virtual void visit(const Set &node) = 0;
-    virtual void visit(const Map &node) = 0;
-    virtual void visit(const Tuple &node) = 0;
-    // virtual void visit(const PolymorphicFuncCall &node) = 0;
+protected:
+    // Type Expression visitors - to be implemented by concrete visitors
+    virtual void visitFuncType(const FuncType &node) = 0;
+    virtual void visitMapType(const MapType &node) = 0;
+    virtual void visitTupleType(const TupleType &node) = 0;
+    virtual void visitSetType(const SetType &node) = 0;
 
-    // Declaration visitors
-    virtual void visit(const Decl &node) = 0;
-    virtual void visit(const FuncDecl &node) = 0;
+    // Expression visitors - to be implemented by concrete visitors
+    virtual void visitVar(const Var &node) = 0;
+    virtual void visitFuncCall(const FuncCall &node) = 0;
+    virtual void visitNum(const Num &node) = 0;
+    virtual void visitString(const String &node) = 0;
+    virtual void visitSet(const Set &node) = 0;
+    virtual void visitMap(const Map &node) = 0;
+    virtual void visitTuple(const Tuple &node) = 0;
 
-    // API and Related visitors
-    virtual void visit(const APIcall &node) = 0;
-    virtual void visit(const API &node) = 0;
-    virtual void visit(const Response &node) = 0;
-    // Initialization visitor
-    virtual void visit(const Init &node) = 0;
+    // Statement visitors - to be implemented by concrete visitors
+    virtual void visitAssign(const Assign &node) = 0;
+    virtual void visitAssume(const Assume &node) = 0;
 
-    // Specification visitor
-    virtual void visit(const Spec &node) = 0;
-
-    // Statement visitors
-    // virtual void visit(const Stmt &node) = 0;
-    virtual void visit(const Assign &node) = 0;
-    virtual void visit(const FuncCallStmt &node) = 0;
-    virtual void visit(const Program &node) = 0;
+public:
+    // High-level visitors for complex structures
+    virtual void visitDecl(const Decl &node) = 0;
+    virtual void visitAPIcall(const APIcall &node) = 0;
+    virtual void visitAPI(const API &node) = 0;
+    virtual void visitResponse(const Response &node) = 0;
+    virtual void visitInit(const Init &node) = 0;
+    virtual void visitSpec(const Spec &node) = 0;
+    virtual void visitProgram(const Program &node) = 0;
 };

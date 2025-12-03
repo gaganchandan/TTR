@@ -1,0 +1,55 @@
+1/12/25
+1. Wherever you are using global variables replace them with getters and setters treat 
+them as part of the functionfactory and write logic in apps1 to get/set the variables (according to me done)
+
+2. push the code to your github and share with sir 
+3. share genATC code with documentation to navigate the code 
+4. Compilation and Linking rules should be different even for the raw testcases in test folder. 
+
+
+
+
+24/11/25
+1. Change Makefile dependencies rule to depend on .hh files instead of .o (acc to me done)
+2. (done) Write seperate testcases, for the rewrite atc. (acc to me done)
+3. (done) Implement Interrupt Logic in genCTC to do that implement isReady() , implement the testcase given to you by sir.
+4. (done) Calling the apis should be in symbolic execution. 
+5. (done) Implement the logic to call the apis, (use app1 in apps)
+
+
+
+
+22/11/25
+1. (done) Use ComputePathConstraint instead of conjoin in see (acc to me done)
+2. (done) get rid of clone, use a visitor implementation instead (acc to me done)
+3. (done) Write testcases for tester
+
+19/11/25
+1. (done) Remove the relative paths in #include statements (everywhere)
+2. (done) GenCTC fill in code (in tester) refer slides sir gave. 
+3. (done) RewriteATC part of tester.( will be useful when we are interuptting the symex)
+
+
+
+17/11/25
+1. (done) Implement A Visitor class properly following the sample code that would be shared to me.
+2. exprToString function to be also Implemented as a Visitor instead of a monolith
+
+
+
+12/11/25
+1. Make the commands to be in a DAG form rather than in Makefile than flatenning out 
+2. (done) Change it from a monolith function to multiple visitors for different classes(what was done before).
+3. (done)context of the z3 solver to not be passed around but should be a variable of inputmaker.
+4. (done)  test_z3solver to only test z3 solver and not have dependencies on see (remove see from in these testcases && shift them to test_see) (done)
+5. (done) Reduce Duplication of code in testcases file by using classes. 
+
+
+10/11/25
+1. Move semantics research + ppt
+2. Change the sigma from map<string,Expr*> to the env type (done)
+3. Implement z3 solver that takes in the path constraints and gives us the final output 
+3.1 Compute path constraints would also (in see.cc) be need to Implemented
+3.2 Visitor for z3 solver  
+3.3 Translate the z3 model into result datastructure
+3.4 Tests to run this. 

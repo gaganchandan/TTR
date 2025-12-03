@@ -12,7 +12,7 @@ template <typename T1, typename T2> void Env<T1, T2>::print() {
 template <typename T1, typename T2> T2& Env<T1, T2>::get(T1 *key) {
 
     if(hasKey(key)) {
-        return *(table[key]);
+        return *(table[*key]);
     }
     if(parent != NULL) {
         return parent->get(key);
@@ -24,13 +24,13 @@ template <typename T1, typename T2> T2& Env<T1, T2>::get(T1 *key) {
 }
 
 template <typename T1, typename T2> bool Env<T1, T2>::hasKey(T1 *key) {
-    return table.find(key) != table.end();
+    return table.find(*key) != table.end();
 }
 
 template <typename T1, typename T2> void Env<T1, T2>::addMapping(T1 *key, T2 *value) {
 
-        if(table.find(key) == table.end()) {
-        table[key] = value;
+    if(table.find(*key) == table.end()) {
+        table[*key] = value;
     }
     else {
         string m = "Env::addMapping : repeat declaration for name " + keyToString(key) + ".";
@@ -48,7 +48,130 @@ string SymbolTable::keyToString(string* key) {
 
 void SymbolTable::print() {
     for(auto &d : table) {
-        
-        cout << keyToString(d.first) << " (" << d.first << "): " << d.second->toString() << endl;
+        cout << d.first << " (" << d.first << ")" << endl;
     }
+}
+
+// ValueEnvironment implementation
+ValueEnvironment::ValueEnvironment(ValueEnvironment *p) : Env(p) {}
+
+string ValueEnvironment::keyToString(string* key) {
+    return *key;
+}
+
+void ValueEnvironment::print() {
+    cout << "Value Environment:" << endl;
+    for(auto &d : table) {
+        cout << "  " << d.first << " -> ";
+        if (d.second) {
+            // Print expression type or value
+            if (d.second->exprType == ExprType::NUM) {
+                Num* num = dynamic_cast<Num*>(d.second);
+                cout << num->value;
+            } else if (d.second->exprType == ExprType::SYMVAR) {
+                cout << "SymVar";
+            } else if (d.second->exprType == ExprType::FUNCCALL) {
+                FuncCall* fc = dynamic_cast<FuncCall*>(d.second);
+                cout << fc->name << "(...)";
+            } else {
+                cout << "Expr";
+            }
+        } else {
+            cout << "null";
+        }
+        cout << endl;
+    }
+}
+
+void ValueEnvironment::setValue(const string& varName, Expr* value) {
+    // For value environment, we allow updating existing values (unlike SymbolTable)
+    table[varName] = value;
+}
+
+Expr* ValueEnvironment::getValue(const string& varName) {
+    if (table.find(varName) != table.end()) {
+        return table[varName];
+    }
+    if (parent != nullptr) {
+        ValueEnvironment* parentEnv = dynamic_cast<ValueEnvironment*>(parent);
+        if (parentEnv) {
+            return parentEnv->getValue(varName);
+        }
+    }
+    return nullptr;
+}
+
+bool ValueEnvironment::hasValue(const string& varName) {
+    if (table.find(varName) != table.end()) {
+        return true;
+    }
+    if (parent != nullptr) {
+        ValueEnvironment* parentEnv = dynamic_cast<ValueEnvironment*>(parent);
+        if (parentEnv) {
+            return parentEnv->hasValue(varName);
+        }
+    }
+    return false;
+}
+
+// ConcValEnv implementation
+ConcValEnv::ConcValEnv(ConcValEnv *p) : Env(p) {}
+
+string ConcValEnv::keyToString(string* key) {
+    return *key;
+}
+
+void ConcValEnv::print() {
+    cout << "Value Environment:" << endl;
+    for(auto &d : table) {
+        cout << "  " << d.first << " -> ";
+        if (d.second) {
+            // Print expression type or value
+            if (d.second->exprType == ExprType::NUM) {
+                Num* num = dynamic_cast<Num*>(d.second);
+                cout << num->value;
+            } else if (d.second->exprType == ExprType::SYMVAR) {
+                cout << "SymVar";
+            } else if (d.second->exprType == ExprType::FUNCCALL) {
+                FuncCall* fc = dynamic_cast<FuncCall*>(d.second);
+                cout << fc->name << "(...)";
+            } else {
+                cout << "Expr";
+            }
+        } else {
+            cout << "null";
+        }
+        cout << endl;
+    }
+}
+
+void ConcValEnv::setValue(const string& varName, Expr* value) {
+    // For value environment, we allow updating existing values (unlike SymbolTable)
+    table[varName] = value;
+}
+
+Expr* ConcValEnv::getValue(const string& varName) {
+    if (table.find(varName) != table.end()) {
+        return table[varName];
+    }
+    if (parent != nullptr) {
+        ConcValEnv* parentEnv = dynamic_cast<ConcValEnv*>(parent);
+        if (parentEnv) {
+            return parentEnv->getValue(varName);
+        }
+    }
+    return nullptr;
+}
+
+bool ConcValEnv::hasValue(const string& varName) {
+    if (table.find(varName) != table.end()) {
+        return true;
+    }
+    if (parent != nullptr) {
+        ConcValEnv* parentEnv = dynamic_cast<ConcValEnv*>(parent);
+        if (parentEnv) {
+            return parentEnv->hasValue(varName);
+        }
+    }
+    return false;
 }

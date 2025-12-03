@@ -13,7 +13,7 @@ T : (Token -> string) map
 P : Program
 PermittedRoleCombinations : Role set set
 ------------------------------------------------------------------------
-
+  
 ------------------------------------APIs------------------------------------
 signup: string * string ==> HTTPResponseCode
 login:  string * string ==> (HTTPResponseCode * token)

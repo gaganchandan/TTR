@@ -1,0 +1,3 @@
+1. Move on cyclic data structures. 
+2. Move on deeply nested datastructures
+3. 

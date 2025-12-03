@@ -1,0 +1,39 @@
+genCTC ---> we call isAbstract and accordingly execute --> now we have some input stmts if we move forward 
+---> then we cal see.execute and execute till we run into a statement that isnt Ready
+
+
+Note- isReady checks if the stmt has been evaluated and stored in valueEnvironment 
+now isReady function will return false when 
+its function call stmt, as output args wouldnt be 
+there in the valueEnvironment (if they are not concrete values), and here we need to concretely call the Function and we 
+get the function from the FunctionFactory class  
+
+All inputs are parameters to the function 
+
+x=input() <-- x= x1
+f(x) --> r <-- isReady 
+
+
+y : int := 0
+// F1
+y1 : int := y
+x1 : int := input <int >()
+assume (x1 < 10)
+r1 : int := f(x1)<-- concretely 
+assert (r1 = true )
+assert (y2 = y1 + x1)
+
+
+Actual Function Calls to 
+
+
+ Statement 0: set_y(0)
+  Statement 1: y1 := get_y()
+  Statement 2: x1 := input()
+  Statement 3: assume(Lt(x1, 10))
+  Statement 4: r1 := f1(x1, 0)
+  Statement 5: y2 := get_y()
+  Statement 6: x2 := input()
+  Statement 7: assume(Lt(x2, 10))
+  Statement 8: r2 := f1(x2, 0)
+

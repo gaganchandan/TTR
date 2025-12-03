@@ -2,7 +2,7 @@
 
 unsigned int SymVar::count = 0;
 
-SymVar::SymVar(unsigned int n) : Expr(ExprType::SYMVAR), num(n) {}
+SymVar::SymVar(unsigned int n = 0) : Expr(ExprType::SYMVAR), num(n) {}
 
 unique_ptr<SymVar> SymVar::getNewSymVar() {
     unique_ptr<SymVar> var = make_unique<SymVar>(count);
@@ -14,9 +14,5 @@ void SymVar::accept(ASTVisitor& visitor) {}
 
 bool SymVar::operator == (SymVar& var) {
     return num == var.num;
-}
-
-unique_ptr<Expr> SymVar::clone() const {
-    return make_unique<SymVar>(num);
 }
 

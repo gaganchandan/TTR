@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "ast.hh"
+#include "../language/ast.hh" // fixed the include path 
 
 using namespace std;
 class Function {

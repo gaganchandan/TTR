@@ -6,14 +6,31 @@
 #include <string>
 #include <vector>
 
-#include "ast.hh"
+#include "../language/ast.hh"
+#include "../language/env.hh"
+#include "../language/symvar.hh"
+
+// Forward declaration
+class FunctionFactory;
 
 using namespace std;
+// see = symbolic execution engine 
+
+
+// Two variables to be added 
+// one corresponding to sigma (value environment - string to expr mapping) 
+//and one corresponding to the path constraint (vector of exprs)
 
 class SEE {
-
     private:
-        unique_ptr<Expr> computePathConstraint(vector<Expr&>);
+        SymVar *symVar=nullptr;
+
+        ValueEnvironment sigma;  // Value environment: maps variable names to their values
+        vector<Expr*> pathConstraint;
+        FunctionFactory* functionFactory; // Factory for creating API functions
+
+
+        unique_ptr<Expr> computePathConstraint(vector<Expr*>);
         // If the statement is a call to an API function, then none of its parameters
         // should be variables whose values are symbolic expression.
         bool isReady(Stmt&, SymbolTable&);
@@ -26,10 +43,26 @@ class SEE {
         // If an expression has a symbolic variable as one of its subexpressions, then
         // it is symbolic expression.
         bool isSymbolic(Expr&, SymbolTable&);
+        
+        // Check if a function call is an API call (not a built-in function)
+        // Built-in functions: Add, Sub, Mul, Eq, Lt, Gt, And, Or, Not, input
+        bool isAPI(const FuncCall& fc);
 
 	void executeStmt(Stmt&, SymbolTable&);
-	void evaluateExpr(Expr&, SymbolTable&);
+	Expr* evaluateExpr(Expr&, SymbolTable&);
     public:
-        void execute();
+        SEE(FunctionFactory* functionFactory) : sigma(nullptr) {
+            this->functionFactory = functionFactory;
+        }
+        
+        // Program and Type Env
+        void execute(Program&, SymbolTable&);
+        
+        // Solve path constraints and return a result
+        unique_ptr<Expr> computePathConstraint();
+        
+        // Getters for testing
+        ValueEnvironment& getSigma() { return sigma; }
+        vector<Expr*>& getPathConstraint() { return pathConstraint; }
 };
 #endif
