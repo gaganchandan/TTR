@@ -1,332 +1,438 @@
-#ifndef AST_HH
-#define AST_HH
+#pragma once
 
-#include <iostream>
-#include <map>
 #include <memory>
-#include <set>
-#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "astvisitor.hh"
+// ================================================================================
+// Enumerations for AST nodes
+// ================================================================================
 
-using namespace std;
-
-enum class HTTPResponseCode
-{
-    OK_200,
-    CREATED_201,
-    BAD_REQUEST_400,
-    // Add other response codes as needed
+enum class HTTPResponseCode {
+  OK_200,
+  CREATED_201,
+  BAD_REQUEST_400,
 };
 
-enum class ExprType
-{
-    INPUT,
-    FUNCCALL,
-    MAP,
-    NUM,
-    POLYFUNCCALL,
-    SET,
-    STRING,
-    SYMVAR,
-    TUPLE,
-    VAR
+enum class ExprType {
+  NUM,
+  STRING,
+  BOOL,
+  VAR,
+  MAP,
+  SET,
+  TUPLE,
+  // MAP_ACCESS,
+  // MAP_UPDATE,
+  FUNC_CALL_EXPR,
+  // POLYMORPHIC_FUNC_CALL_EXPR,
+  INPUT,
+  SYMVAR,
+  // EQUALS
 };
 
-enum class TypeExprType
-{
-    TYPE_CONST,
-    TYPE_VARIABLE,
-    FUNC_TYPE,
-    MAP_TYPE,
-    SET_TYPE,
-    TUPLE_TYPE
+enum class TypeExprType {
+  TYPE_CONST,
+  FUNC_TYPE,
+  MAP_TYPE,
+  SET_TYPE,
+  TUPLE_TYPE
 };
 
-enum class StmtType
-{
-    ASSIGN,
-    ASSUME,
-    ASSERT,
-    DECL
+enum class StmtType {
+  ASSIGN,
+  // FUNC_CALL_STMT,
+  DECL,
+  ASSUME,
+  ASSERT,
 };
 
-class TypeExpr
-{
-public:
-    TypeExprType typeExprType;
-public:
-    virtual ~TypeExpr() = default;
-    virtual string toString() = 0;
-
-protected:
-    TypeExpr(TypeExprType);
-};
-
-class FuncDecl
-{
-public:
-    const string name;
-    const unique_ptr<TypeExpr> params;
-    const unique_ptr<TypeExpr> outp;
-
-    FuncDecl(string, unique_ptr<TypeExpr>, unique_ptr<TypeExpr>);
-};
-
+// ================================================================================
 // Type Expressions
-class TypeConst : public TypeExpr
-{
-public:
-    const string name;
-public:
-    TypeConst(string name);
-    virtual string toString();
-};
+// ================================================================================
 
+// --- Base class for Type Expressions ---
+class TypeExpr {
+public:
+  TypeExprType typeExprType;
 
-class FuncType : public TypeExpr
-{
 public:
-    const vector<unique_ptr<TypeExpr>> params;
-    const unique_ptr<TypeExpr> returnType;
-public:
-    FuncType(vector<unique_ptr<TypeExpr>>, unique_ptr<TypeExpr>);
-    virtual string toString();
-};
-
-class MapType : public TypeExpr
-{
-public:
-    const unique_ptr<TypeExpr> domain;
-    const unique_ptr<TypeExpr> range;
-public:
-    MapType(unique_ptr<TypeExpr>, unique_ptr<TypeExpr>);
-    virtual string toString();
-};
-
-class TupleType : public TypeExpr
-{
-public:
-    const vector<unique_ptr<TypeExpr>> elements;
-public:
-    explicit TupleType(vector<unique_ptr<TypeExpr>>);
-    virtual string toString();
-};
-
-class SetType : public TypeExpr
-{
-public:
-    unique_ptr<TypeExpr> elementType;
-public:
-    explicit SetType(unique_ptr<TypeExpr>);
-    virtual string toString();
-};
-
-class Decl
-{
-public:
-    string name;
-    unique_ptr<TypeExpr> type;
-public:
-    Decl(string, unique_ptr<TypeExpr>);
-    virtual ~Decl() = default;
-    Decl( Decl &);
-//    virtual unique_ptr<Decl> clone();
-};
-
-// Expressions
-class Expr
-{
-public:
-    ExprType exprType;
+  virtual ~TypeExpr() = default;
+  virtual std::string toString() const = 0;
+  virtual std::unique_ptr<TypeExpr> clone() = 0;
+  virtual bool isEqual(const TypeExpr &other) const = 0;
+  bool operator==(const TypeExpr &other) const;
 
 protected:
-    Expr(ExprType);
+  TypeExpr(TypeExprType);
+};
+
+// --- Atomic / Constant Types ---
+class TypeConst : public TypeExpr {
+public:
+  const std::string name;
 
 public:
-    virtual ~Expr() = default;
+  TypeConst(std::string name);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<TypeExpr> clone();
+  virtual bool isEqual(const TypeExpr &other) const;
+};
+
+// --- Function Types ---
+class FuncType : public TypeExpr {
+public:
+  const std::vector<std::unique_ptr<TypeExpr>> params;
+  const std::unique_ptr<TypeExpr> returnType;
+
+public:
+  FuncType(std::vector<std::unique_ptr<TypeExpr>>, std::unique_ptr<TypeExpr>);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<TypeExpr> clone();
+  virtual bool isEqual(const TypeExpr &other) const;
+};
+
+// --- Map Types ---
+class MapType : public TypeExpr {
+public:
+  const std::unique_ptr<TypeExpr> domain;
+  const std::unique_ptr<TypeExpr> range;
+
+public:
+  MapType(std::unique_ptr<TypeExpr>, std::unique_ptr<TypeExpr>);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<TypeExpr> clone();
+  virtual bool isEqual(const TypeExpr &other) const;
+};
+
+// --- Set Types ---
+class SetType : public TypeExpr {
+public:
+  std::unique_ptr<TypeExpr> elementType;
+
+public:
+  explicit SetType(std::unique_ptr<TypeExpr>);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<TypeExpr> clone();
+  virtual bool isEqual(const TypeExpr &other) const;
+};
+
+// --- Tuple Types ---
+class TupleType : public TypeExpr {
+public:
+  const std::vector<std::unique_ptr<TypeExpr>> elements;
+
+public:
+  explicit TupleType(std::vector<std::unique_ptr<TypeExpr>>);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<TypeExpr> clone();
+  virtual bool isEqual(const TypeExpr &other) const;
+};
+
+// ================================================================================
+// Expressions (Expr hierarchy)
+// ================================================================================
+
+// --- Base class for Expressions ---
+class Expr {
+public:
+  ExprType exprType;
+
+protected:
+  Expr(ExprType);
+
+public:
+  virtual ~Expr() = default;
+  virtual std::string toString() const = 0;
+  virtual std::unique_ptr<Expr> clone() = 0;
+};
+
+// --- Literals ---
+class Bool : public Expr {
+public:
+  const bool value;
+
+public:
+  explicit Bool(bool);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
+};
+
+class Num : public Expr {
+public:
+  const int value;
+
+public:
+  explicit Num(int);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
+};
+
+class String : public Expr {
+public:
+  const std::string value;
+
+public:
+  explicit String(std::string);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
+};
+
+// --- Variables and Input ---
+class Var : public Expr {
+public:
+  std::string name;
+
+public:
+  explicit Var(std::string);
+  bool operator<(const Var &v) const;
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
 };
 
 class Input : public Expr {
 public:
-    Input();
+  Input();
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
 };
 
-class FuncCall : public Expr
-{
+// --- Collections ---
+// --- Set ---
+class Set : public Expr {
 public:
-    const string name;
-    const vector<unique_ptr<Expr>> args;
+  const std::vector<std::unique_ptr<Expr>> elements;
+
 public:
-    FuncCall(string, vector<unique_ptr<Expr>>);
+  explicit Set(std::vector<std::unique_ptr<Expr>>);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
 };
 
-class Map : public Expr
-{
+// --- Map ---
+class Map : public Expr {
 public:
-    const vector<pair<unique_ptr<Var>, unique_ptr<Expr>>> value;
+  const std::vector<std::pair<std::unique_ptr<Var>, std::unique_ptr<Expr>>>
+      value;
+
 public:
-    explicit Map(vector<pair<unique_ptr<Var>, unique_ptr<Expr>>>);
+  explicit Map(
+      std::vector<std::pair<std::unique_ptr<Var>, std::unique_ptr<Expr>>>);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
 };
 
-class Num : public Expr
-{
+// class MapAccess : public Expr {
+// public:
+//   const std::unique_ptr<Var> mapName;
+//   const std::unique_ptr<Expr> keyExpr;
+
+// public:
+//   MapAccess(std::unique_ptr<Var>, std::unique_ptr<Expr>);
+//   virtual std::string toString() const;
+//   virtual std::unique_ptr<Expr> clone();
+// };
+
+// class MapUpdate : public Expr {
+// public:
+//   const std::unique_ptr<Var> mapName;
+//   const std::unique_ptr<Expr> keyExpr;
+//   const std::unique_ptr<Expr> valueExpr;
+
+// public:
+//   MapUpdate(std::unique_ptr<Var>, std::unique_ptr<Expr>,
+//   std::unique_ptr<Expr>); virtual std::string toString() const; virtual
+//   std::unique_ptr<Expr> clone();
+// };
+
+// --- Tuples ---
+class Tuple : public Expr {
 public:
-    const int value;
+  const std::vector<std::unique_ptr<Expr>> exprs;
+
 public:
-    explicit Num(int);
+  explicit Tuple(std::vector<std::unique_ptr<Expr>> exprs);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
 };
 
-class Set : public Expr
-{
+// --- Function Calls ---
+class FuncCall : public Expr {
 public:
-    const vector<unique_ptr<Expr>> elements;
+  const std::string name;
+  const std::vector<std::unique_ptr<Expr>> args;
+
 public:
-    explicit Set(vector<unique_ptr<Expr>>);
+  FuncCall(std::string, std::vector<std::unique_ptr<Expr>>);
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
 };
 
-class String : public Expr
-{
+// --- Equality ---
+// class Equals : public Expr {
+// public:
+//   const std::unique_ptr<Expr> left;
+//   const std::unique_ptr<Expr> right;
+
+// public:
+//   Equals(std::unique_ptr<Expr>, std::unique_ptr<Expr>);
+//   virtual std::string toString() const;
+//   virtual std::unique_ptr<Expr> clone();
+// };
+
+// ================================================================================
+// Declarations
+// ================================================================================
+
+class Decl {
 public:
-    const string value;
+  std::string name;
+  std::unique_ptr<TypeExpr> type;
+
 public:
-    explicit String(string);
+  Decl(std::string, std::unique_ptr<TypeExpr>);
+  virtual ~Decl() = default;
+  Decl(Decl &);
+  virtual std::unique_ptr<Decl> clone();
 };
 
-class Tuple : public Expr
-{
+class FuncDecl {
 public:
-    const vector<unique_ptr<Expr>> exprs;
+  const std::string name;
+  const std::vector<std::unique_ptr<TypeExpr>> params;
+  const std::pair<HTTPResponseCode, std::unique_ptr<TypeExpr>> returnType;
+
 public:
-    explicit Tuple(vector<unique_ptr<Expr>> exprs);
+  FuncDecl(std::string, std::vector<std::unique_ptr<TypeExpr>>,
+           std::pair<HTTPResponseCode, std::unique_ptr<TypeExpr>>);
+  virtual ~FuncDecl() = default;
+  FuncDecl(FuncDecl &);
+  virtual std::unique_ptr<FuncDecl> clone();
 };
 
-class Var : public Expr
-{
+// ================================================================================
+// Nodes for Specification
+// ================================================================================
+
+class Init {
 public:
-    string name;
+  const std::string varName;
+  const std::unique_ptr<Expr> expr;
+
 public:
-    explicit Var(string);
-    bool operator<(const Var &v) const;
+  Init(std::string, std::unique_ptr<Expr>);
 };
 
-// Function Declaration
-class APIFuncDecl
-{
+class Response {
 public:
-    const string name;
-    const vector<unique_ptr<TypeExpr>> params;
-    const pair<HTTPResponseCode, vector<unique_ptr<TypeExpr>>> returnType;
+  HTTPResponseCode code;
+  std::unique_ptr<Expr> expr;
+
 public:
-    APIFuncDecl(string,
-             vector<unique_ptr<TypeExpr>>,
-             pair<HTTPResponseCode, vector<unique_ptr<TypeExpr>>>);
+  Response(HTTPResponseCode, std::unique_ptr<Expr>);
 };
 
-// Initialization
-class Init
-{
+class APIcall {
 public:
-    const string varName;
-    const unique_ptr<Expr> expr;
+  const std::unique_ptr<FuncCall> call;
+  const Response response;
+
 public:
-    Init(string, unique_ptr<Expr>);
+  APIcall(std::unique_ptr<FuncCall>, Response);
 };
 
-class Response
-{
+class API {
 public:
-    unique_ptr<Expr> ResponseExpr;
+  std::string name;
+  std::unique_ptr<Expr> pre;
+  std::unique_ptr<APIcall> call;
+  std::unique_ptr<Expr> post;
+
 public:
-    Response( unique_ptr<Expr>);
+  API(std::string, std::unique_ptr<Expr>, std::unique_ptr<APIcall>,
+      std::unique_ptr<Expr>);
 };
 
-class APIcall
-{
+// ================================================================================
+// Statements
+// ================================================================================
+
+// --- Base class for Statements ---
+class Stmt {
 public:
-    const unique_ptr<FuncCall> call;
-    const Response response;
+  const StmtType statementType;
 
 public:
-    APIcall(unique_ptr<FuncCall>, Response);
-};
+  virtual ~Stmt() = default;
+  virtual std::unique_ptr<Stmt> clone() = 0;
 
-// API
-class API
-{
-public:
-
-    string name; // Optional name for the API block
-    unique_ptr<Expr> pre;
-    unique_ptr<APIcall> call;
-    Response response;
-public:
-    API(unique_ptr<Expr>, unique_ptr<APIcall>, Response, string name="");
-};
-
-// Block class (placeholder as it wasn't fully specified in the grammar)
-// Top-level Spec class
-class Spec
-{
-public:
-    const vector<unique_ptr<Decl>> globals;
-    const vector<unique_ptr<Init>> init;
-    const vector<unique_ptr<APIFuncDecl>> functions;
-    const vector<unique_ptr<API>> blocks;
-public:
-    Spec(vector<unique_ptr<Decl>>,
-         vector<unique_ptr<Init>>,
-         vector<unique_ptr<APIFuncDecl>>,
-         vector<unique_ptr<API>>);
-};
-
-class Stmt
-{
-public:
-    const StmtType statementType;
-public:
-    virtual ~Stmt() = default;
 protected:
-    Stmt(StmtType);
+  Stmt(StmtType);
 };
 
-// Assignment statement: l = r
-class Assign : public Stmt
-{
+// --- Assignment Statement ---
+class Assign : public Stmt {
 public:
-    const unique_ptr<Expr> left;  // Changed from Var to Expr to support tuples
-    const unique_ptr<Expr> right;
+  const std::unique_ptr<Var> left;
+  const std::unique_ptr<Expr> right;
+
 public:
-    Assign(unique_ptr<Expr>, unique_ptr<Expr>);
+  Assign(std::unique_ptr<Var>, std::unique_ptr<Expr>);
+  virtual std::unique_ptr<Stmt> clone();
 };
 
-// Assume statement: assume(c)
-class Assume : public Stmt
-{
+// --- Function Call Statement ---
+// class FuncCallStmt : public Stmt {
+// public:
+//   const std::unique_ptr<FuncCall> funcCall;
+
+// public:
+//   explicit FuncCallStmt(std::unique_ptr<FuncCall>);
+//   virtual std::unique_ptr<Stmt> clone();
+// };
+
+// --- Assume statement ---
+class Assume : public Stmt {
 public:
-    const unique_ptr<Expr> expr;
+  const std::unique_ptr<Expr> expr;
+
 public:
-    Assume(unique_ptr<Expr>);
+  Assume(std::unique_ptr<Expr>);
+  virtual std::unique_ptr<Stmt> clone();
 };
 
-// Assert statement: assert(c)
-class Assert : public Stmt
-{
+// --- Assert statement ---
+class Assert : public Stmt {
 public:
-    const unique_ptr<Expr> expr;
+  const std::unique_ptr<Expr> expr;
+
 public:
-    Assert(unique_ptr<Expr>);
+  Assert(std::unique_ptr<Expr>);
+  virtual std::unique_ptr<Stmt> clone();
 };
 
-//    is the root of our AST
-class Program
-{
+// ================================================================================
+// Top-level AST Nodes
+// ================================================================================
+
+class Spec {
 public:
-    const vector<unique_ptr<Stmt>> statements;
+  const std::vector<std::unique_ptr<Decl>> globals;
+  const std::vector<std::unique_ptr<Init>> init;
+  const std::vector<std::unique_ptr<FuncDecl>> functions;
+  const std::vector<std::unique_ptr<API>> blocks;
+
 public:
-    explicit Program(vector<unique_ptr<Stmt>>);
+  Spec(std::vector<std::unique_ptr<Decl>>, std::vector<std::unique_ptr<Init>>,
+       std::vector<std::unique_ptr<FuncDecl>>,
+       std::vector<std::unique_ptr<API>>);
 };
-#endif
+
+class Program {
+public:
+  const std::vector<std::unique_ptr<Stmt>> statements;
+
+public:
+  explicit Program(std::vector<std::unique_ptr<Stmt>>);
+};

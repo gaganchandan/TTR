@@ -8,7 +8,7 @@ INC_SYM=-I see
 LIB=-lz3
 
 # Common object file dependencies
-COMMON_OBJS=$(BUILD)/ast.o $(BUILD)/astvisitor.o $(BUILD)/env.o $(BUILD)/symvar.o $(BUILD)/clonevisitor.o $(BUILD)/printvisitor.o 
+COMMON_OBJS=$(BUILD)/ast.o $(BUILD)/visitor.o $(BUILD)/env.o $(BUILD)/symvar.o $(BUILD)/printer.o 
 SEE_OBJS=$(BUILD)/see.o $(BUILD)/z3solver.o $(BUILD)/solver.o
 TEST_OBJS=$(BUILD)/test_utils.o
 TESTER_OBJS=$(BUILD)/tester.o
@@ -19,38 +19,35 @@ ALL_TEST_DEPS=$(TEST_OBJS) $(SEE_OBJS) $(COMMON_OBJS) $(APP_OBJS) $(BUILD)/typem
 # --------------------------------------------------
 #  Object build rules (only what is actually used)
 # --------------------------------------------------
-$(BUILD)/app1.o : apps/app1/app1.cc apps/app1/app1.hh language/ast.hh language/astvisitor.hh language/symvar.hh language/clonevisitor.hh
+$(BUILD)/app1.o : apps/app1/app1.cc apps/app1/app1.hh language/ast.hh language/visitor.hh language/symvar.hh
 	$(CC) $(CCFLAGS) -c apps/app1/app1.cc -o $@ $(INC) $(INC_SYM) 
 
 
-$(BUILD)/astvisitor.o : language/astvisitor.cc language/astvisitor.hh language/ast.hh
-	$(CC) $(CCFLAGS) -c language/astvisitor.cc -o $@ $(INC)
+$(BUILD)/visitor.o : language/visitor.cc language/visitor.hh language/ast.hh
+	$(CC) $(CCFLAGS) -c language/visitor.cc -o $@ $(INC)
 
-$(BUILD)/ast.o : $(BUILD)/astvisitor.o language/ast.cc language/ast.hh language/astvisitor.hh
+$(BUILD)/ast.o : $(BUILD)/visitor.o language/ast.cc language/ast.hh language/visitor.hh
 	$(CC) $(CCFLAGS) -c language/ast.cc -o $@ $(INC)
 
 $(BUILD)/env.o : language/env.cc language/env.hh
 	$(CC) $(CCFLAGS) -c language/env.cc -o $@ $(INC)
 
-$(BUILD)/symvar.o : language/symvar.cc language/symvar.hh language/ast.hh language/astvisitor.hh
+$(BUILD)/symvar.o : language/symvar.cc language/symvar.hh language/ast.hh language/visitor.hh
 	$(CC) $(CCFLAGS) -c language/symvar.cc -o $@ $(INC)
 
-$(BUILD)/clonevisitor.o : language/clonevisitor.cc language/clonevisitor.hh language/ast.hh language/astvisitor.hh language/symvar.hh
-	$(CC) $(CCFLAGS) -c language/clonevisitor.cc -o $@ $(INC)
-
-$(BUILD)/printvisitor.o : language/printvisitor.cc language/printvisitor.hh language/ast.hh language/astvisitor.hh language/symvar.hh
-	$(CC) $(CCFLAGS) -c language/printvisitor.cc -o $@ $(INC)
+$(BUILD)/printer.o : language/printer.cc language/printer.hh language/ast.hh language/visitor.hh language/symvar.hh
+	$(CC) $(CCFLAGS) -c language/printer.cc -o $@ $(INC)
 
 $(BUILD)/solver.o : see/solver.cc see/solver.hh language/ast.hh
 	$(CC) $(CCFLAGS) -c see/solver.cc -o $@ $(INC) $(LIB)
 
-$(BUILD)/see.o : see/see.cc see/see.hh language/ast.hh language/env.hh see/functionfactory.hh language/clonevisitor.hh
+$(BUILD)/see.o : see/see.cc see/see.hh language/ast.hh language/env.hh see/functionfactory.hh
 	$(CC) $(CCFLAGS) -c see/see.cc -o $@ $(INC)
 
 $(BUILD)/z3solver.o : see/z3solver.cc see/z3solver.hh see/solver.hh language/ast.hh language/symvar.hh
 	$(CC) $(CCFLAGS) -c see/z3solver.cc -o $@ $(INC) $(LIB)
 
-$(BUILD)/tester.o : tester/tester.cc tester/tester.hh language/ast.hh language/clonevisitor.hh
+$(BUILD)/tester.o : tester/tester.cc tester/tester.hh language/ast.hh
 	$(CC) $(CCFLAGS) -c tester/tester.cc -o $@ $(INC) $(LIB)
 
 $(BUILD)/test_utils.o : tester/test_utils.cc tester/test_utils.hh see/see.hh see/z3solver.hh

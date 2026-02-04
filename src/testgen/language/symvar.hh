@@ -1,20 +1,24 @@
 #ifndef SYMVAR_HH
 #define SYMVAR_HH
 
-#include <memory>
 #include "ast.hh"
+#include "visitor.hh"
+#include <memory>
 
 using namespace std;
 
 class SymVar : public Expr {
-    private:
-        static unsigned int count;
-        unsigned int num;
-    public:
-        SymVar(unsigned int);
-        static unique_ptr<SymVar>getNewSymVar();
-        virtual void accept(ASTVisitor&);
-        bool operator == (SymVar&);
-        unsigned int getNum() const { return num; }
+private:
+  static unsigned int count;
+  unsigned int num;
+
+public:
+  SymVar(unsigned int);
+  static unique_ptr<SymVar> getNewSymVar();
+  virtual void accept(Visitor &);
+  bool operator==(SymVar &);
+  unsigned int getNum() const { return num; }
+  virtual std::string toString() const;
+  virtual std::unique_ptr<Expr> clone();
 };
 #endif
