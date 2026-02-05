@@ -158,7 +158,7 @@ protected:
     std::vector<std::unique_ptr<Init>> inits;
     inits.push_back(std::make_unique<Init>("y", std::make_unique<Num>(0)));
 
-    std::vector<std::unique_ptr<FuncDecl>> functions;
+    std::vector<std::unique_ptr<APIFuncDecl>> functions;
     std::vector<std::unique_ptr<API>> blocks;
 
     // API Block: f1(x, z)
@@ -334,7 +334,7 @@ protected:
     std::vector<std::unique_ptr<Init>> inits;
     inits.push_back(std::make_unique<Init>("y", std::make_unique<Num>(0)));
 
-    std::vector<std::unique_ptr<FuncDecl>> functions;
+    std::vector<std::unique_ptr<APIFuncDecl>> functions;
     std::vector<std::unique_ptr<API>> blocks;
 
     // Block 1: f1(x, z)
@@ -510,7 +510,7 @@ protected:
     inits.push_back(std::make_unique<Init>(
         "_tmp", std::make_unique<FuncCall>("set_y", std::move(setYArgs))));
 
-    std::vector<std::unique_ptr<FuncDecl>> functions;
+    std::vector<std::unique_ptr<APIFuncDecl>> functions;
     std::vector<std::unique_ptr<API>> blocks;
 
     // Precondition: x < 10 AND Any(z)

@@ -3,93 +3,44 @@
 Printer::Printer() : indentLevel(0) { updateIndent(); }
 
 // Type Expression visitors
-void Printer::visitTypeConst(const TypeConst &node) { std::cout << node.name; }
+void Printer::visitTypeConst(const TypeConst &node) {
+  std::cout << node.toString();
+}
 
 void Printer::visitFuncType(const FuncType &node) {
-  std::cout << "(";
-  for (size_t i = 0; i < node.params.size(); i++) {
-    if (i > 0)
-      std::cout << ", ";
-    visit(node.params[i].get());
-  }
-  std::cout << ") -> ";
-  visit(node.returnType.get());
+  std::cout << node.toString();
 }
 
 void Printer::visitMapType(const MapType &node) {
-  std::cout << "map<";
-  visit(node.domain.get());
-  std::cout << ", ";
-  visit(node.range.get());
-  std::cout << ">";
+  std::cout << node.toString();
 }
 
 void Printer::visitTupleType(const TupleType &node) {
-  std::cout << "(";
-  for (size_t i = 0; i < node.elements.size(); i++) {
-    if (i > 0)
-      std::cout << ", ";
-    visit(node.elements[i].get());
-  }
-  std::cout << ")";
+  std::cout << node.toString();
 }
 
 void Printer::visitSetType(const SetType &node) {
-  std::cout << "set<";
-  visit(node.elementType.get());
-  std::cout << ">";
+  std::cout << node.toString();
 }
 
 // Expression visitors
-void Printer::visitVar(const Var &node) { std::cout << node.name; }
+void Printer::visitVar(const Var &node) { std::cout << node.toString(); }
 
 void Printer::visitFuncCall(const FuncCall &node) {
-  std::cout << node.name << "(";
-  for (size_t i = 0; i < node.args.size(); i++) {
-    if (i > 0)
-      std::cout << ", ";
-    visit(node.args[i].get());
-  }
-  std::cout << ")";
+  std::cout << node.toString();
 }
 
-void Printer::visitNum(const Num &node) { std::cout << node.value; }
+void Printer::visitNum(const Num &node) { std::cout << node.toString(); }
 
-void Printer::visitString(const String &node) {
-  std::cout << "\"" << node.value << "\"";
-}
+void Printer::visitString(const String &node) { std::cout << node.toString(); }
 
-void Printer::visitSet(const Set &node) {
-  std::cout << "{";
-  for (size_t i = 0; i < node.elements.size(); i++) {
-    if (i > 0)
-      std::cout << ", ";
-    visit(node.elements[i].get());
-  }
-  std::cout << "}";
-}
+void Printer::visitBool(const Bool &node) { std::cout << node.toString(); }
 
-void Printer::visitMap(const Map &node) {
-  std::cout << "{";
-  for (size_t i = 0; i < node.value.size(); i++) {
-    if (i > 0)
-      std::cout << ", ";
-    visit(node.value[i].first.get());
-    std::cout << " -> ";
-    visit(node.value[i].second.get());
-  }
-  std::cout << "}";
-}
+void Printer::visitSet(const Set &node) { std::cout << node.toString(); }
 
-void Printer::visitTuple(const Tuple &node) {
-  std::cout << "(";
-  for (size_t i = 0; i < node.exprs.size(); i++) {
-    if (i > 0)
-      std::cout << ", ";
-    visit(node.exprs[i].get());
-  }
-  std::cout << ")";
-}
+void Printer::visitMap(const Map &node) { node.toString(); }
+
+void Printer::visitTuple(const Tuple &node) { node.toString(); }
 
 // Statement visitors
 void Printer::visitAssign(const Assign &node) {

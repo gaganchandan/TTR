@@ -297,18 +297,32 @@ public:
   virtual std::unique_ptr<Decl> clone();
 };
 
-class FuncDecl {
+// class FuncDecl {
+// public:
+//   const std::string name;
+//   const std::vector<std::unique_ptr<TypeExpr>> params;
+//   const std::unique_ptr<TypeExpr> returnType;
+
+// public:
+//   FuncDecl(std::string, std::vector<std::unique_ptr<TypeExpr>>,
+//            std::unique_ptr<TypeExpr>);
+//   virtual ~FuncDecl() = default;
+//   FuncDecl(FuncDecl &);
+//   virtual std::unique_ptr<FuncDecl> clone();
+// };
+
+class APIFuncDecl {
 public:
   const std::string name;
   const std::vector<std::unique_ptr<TypeExpr>> params;
   const std::pair<HTTPResponseCode, std::unique_ptr<TypeExpr>> returnType;
 
 public:
-  FuncDecl(std::string, std::vector<std::unique_ptr<TypeExpr>>,
-           std::pair<HTTPResponseCode, std::unique_ptr<TypeExpr>>);
-  virtual ~FuncDecl() = default;
-  FuncDecl(FuncDecl &);
-  virtual std::unique_ptr<FuncDecl> clone();
+  APIFuncDecl(std::string, std::vector<std::unique_ptr<TypeExpr>>,
+              std::pair<HTTPResponseCode, std::unique_ptr<TypeExpr>>);
+  virtual ~APIFuncDecl() = default;
+  APIFuncDecl(APIFuncDecl &);
+  virtual std::unique_ptr<APIFuncDecl> clone();
 };
 
 // ================================================================================
@@ -420,12 +434,12 @@ class Spec {
 public:
   const std::vector<std::unique_ptr<Decl>> globals;
   const std::vector<std::unique_ptr<Init>> init;
-  const std::vector<std::unique_ptr<FuncDecl>> functions;
+  const std::vector<std::unique_ptr<APIFuncDecl>> functions;
   const std::vector<std::unique_ptr<API>> blocks;
 
 public:
   Spec(std::vector<std::unique_ptr<Decl>>, std::vector<std::unique_ptr<Init>>,
-       std::vector<std::unique_ptr<FuncDecl>>,
+       std::vector<std::unique_ptr<APIFuncDecl>>,
        std::vector<std::unique_ptr<API>>);
 };
 

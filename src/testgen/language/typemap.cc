@@ -9,38 +9,7 @@ string TypeMap::keyToString(string *key) { return *key; }
 void TypeMap::print() {
   std::cout << "TypeMap:" << std::endl;
   for (auto &d : table) {
-    std::cout << "  " << d.first << " : ";
-    if (d.second) {
-      // Print type expression
-      switch (d.second->typeExprType) {
-      case TypeExprType::TYPE_CONST: {
-        TypeConst *tc = dynamic_cast<TypeConst *>(d.second);
-        std::cout << tc->name;
-        break;
-      }
-      case TypeExprType::MAP_TYPE: {
-        MapType *mt = dynamic_cast<MapType *>(d.second);
-        std::cout << "map<...>";
-        break;
-      }
-      case TypeExprType::SET_TYPE: {
-        std::cout << "set<...>";
-        break;
-      }
-      case TypeExprType::TUPLE_TYPE: {
-        std::cout << "tuple<...>";
-        break;
-      }
-      case TypeExprType::FUNC_TYPE: {
-        std::cout << "func<...>";
-        break;
-      }
-      default:
-        std::cout << "unknown";
-      }
-    } else {
-      std::cout << "null";
-    }
+    std::cout << "  " << d.first << " : " << d.second->toString();
     std::cout << std::endl;
   }
 }

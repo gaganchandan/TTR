@@ -49,6 +49,7 @@ protected:
   void visitFuncCall(const FuncCall &node) override;
   void visitNum(const Num &node) override;
   void visitString(const String &node) override;
+  void visitBool(const Bool &node) override;
   void visitSet(const Set &node) override;
   void visitMap(const Map &node) override;
   void visitTuple(const Tuple &node) override;

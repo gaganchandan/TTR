@@ -153,13 +153,6 @@ bool SetType::isEqual(const TypeExpr &other) const {
   return *elementType == *otherSet.elementType;
 }
 
-Decl::Decl(std::string name, std::unique_ptr<TypeExpr> typeExpr)
-    : name(std::move(name)), type(std::move(typeExpr)) {}
-
-std::unique_ptr<Decl> Decl::clone() {
-  return std::make_unique<Decl>(name, type->clone());
-}
-
 // ===============================================================================
 // Expressions Implementation
 // ===============================================================================
@@ -356,18 +349,41 @@ std::unique_ptr<Expr> FuncCall::clone() {
 // ===============================================================================
 // Declarations Implementation
 // ===============================================================================
-FuncDecl::FuncDecl(
+
+Decl::Decl(std::string name, std::unique_ptr<TypeExpr> typeExpr)
+    : name(std::move(name)), type(std::move(typeExpr)) {}
+
+std::unique_ptr<Decl> Decl::clone() {
+  return std::make_unique<Decl>(name, type->clone());
+}
+
+// FuncDecl::FuncDecl(std::string name,
+//                    std::vector<std::unique_ptr<TypeExpr>> params,
+//                    std::unique_ptr<TypeExpr> returnType)
+//     : name(std::move(name)), params(std::move(params)),
+//       returnType(std::move(returnType)) {}
+
+// std::unique_ptr<FuncDecl> FuncDecl::clone() {
+//   std::vector<std::unique_ptr<TypeExpr>> clonedParams;
+//   for (const auto &param : params) {
+//     clonedParams.push_back(param->clone());
+//   }
+//   return std::make_unique<FuncDecl>(name, std::move(clonedParams),
+//                                     returnType->clone());
+// }
+
+APIFuncDecl::APIFuncDecl(
     std::string name, std::vector<std::unique_ptr<TypeExpr>> params,
     std::pair<HTTPResponseCode, std::unique_ptr<TypeExpr>> returnType)
     : name(std::move(name)), params(std::move(params)),
       returnType(std::move(returnType)) {}
 
-std::unique_ptr<FuncDecl> FuncDecl::clone() {
+std::unique_ptr<APIFuncDecl> APIFuncDecl::clone() {
   std::vector<std::unique_ptr<TypeExpr>> clonedParams;
   for (const auto &param : params) {
     clonedParams.push_back(param->clone());
   }
-  return std::make_unique<FuncDecl>(
+  return std::make_unique<APIFuncDecl>(
       name, std::move(clonedParams),
       std::make_pair(returnType.first, returnType.second->clone()));
 }
@@ -426,7 +442,7 @@ std::unique_ptr<Stmt> Assert::clone() {
 // ================================================================================
 Spec::Spec(std::vector<std::unique_ptr<Decl>> globals,
            std::vector<std::unique_ptr<Init>> init,
-           std::vector<std::unique_ptr<FuncDecl>> functions,
+           std::vector<std::unique_ptr<APIFuncDecl>> functions,
            std::vector<std::unique_ptr<API>> blocks)
     : globals(std::move(globals)), init(std::move(init)),
       functions(std::move(functions)), blocks(std::move(blocks)) {}

@@ -1,7 +1,4 @@
 #pragma once
-#include <iostream>
-#include <stdexcept>
-#include <string>
 
 // Forward declarations
 class TypeConst;
@@ -15,12 +12,13 @@ class Var;
 class FuncCall;
 class Num;
 class String;
+class Bool;
 class Set;
 class Map;
 class Tuple;
 class PolymorphicFuncCall;
 class Decl;
-class FuncDecl;
+class APIFuncDecl;
 class APIcall;
 class Response;
 class API;
@@ -58,6 +56,7 @@ protected:
   virtual void visitFuncCall(const FuncCall &node) = 0;
   virtual void visitNum(const Num &node) = 0;
   virtual void visitString(const String &node) = 0;
+  virtual void visitBool(const Bool &node) = 0;
   virtual void visitSet(const Set &node) = 0;
   virtual void visitMap(const Map &node) = 0;
   virtual void visitTuple(const Tuple &node) = 0;

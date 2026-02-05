@@ -135,7 +135,7 @@ protected:
         make_unique<Map>(vector<pair<unique_ptr<Var>, unique_ptr<Expr>>>())));
 
     // No API functions or blocks
-    vector<unique_ptr<FuncDecl>> functions;
+    vector<unique_ptr<APIFuncDecl>> functions;
     vector<unique_ptr<API>> blocks;
 
     return make_unique<Spec>(std::move(globals), std::move(inits),
@@ -203,7 +203,7 @@ protected:
         "U",
         make_unique<Map>(vector<pair<unique_ptr<Var>, unique_ptr<Expr>>>())));
 
-    vector<unique_ptr<FuncDecl>> functions;
+    vector<unique_ptr<APIFuncDecl>> functions;
 
     // API Block: signup(u, p)
     // Pre: not_in(u, U)
@@ -347,7 +347,7 @@ protected:
         "U",
         make_unique<Map>(vector<pair<unique_ptr<Var>, unique_ptr<Expr>>>())));
 
-    vector<unique_ptr<FuncDecl>> functions;
+    vector<unique_ptr<APIFuncDecl>> functions;
 
     // API Block: signup(u, p)
     // Pre: not_in(u, U)
@@ -502,7 +502,7 @@ protected:
         "T",
         make_unique<Map>(vector<pair<unique_ptr<Var>, unique_ptr<Expr>>>())));
 
-    vector<unique_ptr<FuncDecl>> functions;
+    vector<unique_ptr<APIFuncDecl>> functions;
     vector<unique_ptr<API>> blocks;
 
     // Block 1: signup(u, p)
