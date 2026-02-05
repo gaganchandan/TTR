@@ -6,22 +6,37 @@ BIN=bin
 INC=-I language
 INC_SYM=-I see
 LIB=-lz3
+LEX=flex
+YACC=bison
 
 # Common object file dependencies
 COMMON_OBJS=$(BUILD)/ast.o $(BUILD)/visitor.o $(BUILD)/env.o $(BUILD)/symvar.o $(BUILD)/printer.o 
+PARSER_OBJS=$(BUILD)/parser.tab.o $(BUILD)/lex.yy.o
 SEE_OBJS=$(BUILD)/see.o $(BUILD)/z3solver.o $(BUILD)/solver.o
 TEST_OBJS=$(BUILD)/test_utils.o
 TESTER_OBJS=$(BUILD)/tester.o
 GENATC_OBJS=$(BUILD)/genATC.o
 APP_OBJS=$(BUILD)/app1.o
 # All dependencies for tests
-ALL_TEST_DEPS=$(TEST_OBJS) $(SEE_OBJS) $(COMMON_OBJS) $(APP_OBJS) $(BUILD)/typemap.o
+ALL_TEST_DEPS=$(TEST_OBJS) $(SEE_OBJS) $(COMMON_OBJS) $(PARSER_OBJS) $(APP_OBJS) $(BUILD)/typemap.o
+
 # --------------------------------------------------
 #  Object build rules (only what is actually used)
 # --------------------------------------------------
+$(BUILD)/parser.tab.cc $(BUILD)/parser.tab.hh: language/parser.yy
+	$(YACC) -d -o $(BUILD)/parser.tab.cc language/parser.yy
+
+$(BUILD)/lex.yy.cc: language/lexer.ll $(BUILD)/parser.tab.hh
+	$(LEX) -o $(BUILD)/lex.yy.cc language/lexer.ll
+
+$(BUILD)/parser.tab.o: $(BUILD)/parser.tab.cc $(BUILD)/parser.tab.hh language/ast.hh
+	$(CC) $(CCFLAGS) -c $(BUILD)/parser.tab.cc -o $@ $(INC)
+
+$(BUILD)/lex.yy.o: $(BUILD)/lex.yy.cc $(BUILD)/parser.tab.hh
+	$(CC) $(CCFLAGS) -c $(BUILD)/lex.yy.cc -o $@ $(INC)
+
 $(BUILD)/app1.o : apps/app1/app1.cc apps/app1/app1.hh language/ast.hh language/visitor.hh language/symvar.hh
 	$(CC) $(CCFLAGS) -c apps/app1/app1.cc -o $@ $(INC) $(INC_SYM) 
-
 
 $(BUILD)/visitor.o : language/visitor.cc language/visitor.hh language/ast.hh
 	$(CC) $(CCFLAGS) -c language/visitor.cc -o $@ $(INC)
@@ -115,6 +130,15 @@ run_test_e2e: test_e2e
 	./$(BIN)/test_e2e
 
 test: run_test_see run_test_z3solver run_test_tester run_test_genATC run_test_e2e
+
+# --------------------------------------------------
+#  Main testgen 
+#  --------------------------------------------------
+$(BUILD)/testgen.o : main.cc tester/genATC.hh tester/tester.hh tester/test_utils.hh apps/app1/app1.hh
+	$(CC) $(CCFLAGS) -c main.cc -o $@ $(INC) $(INC_SYM)
+
+testgen: $(BUILD)/testgen.o $(ALL_TEST_DEPS) $(TESTER_OBJS) $(GENATC_OBJS)
+	$(CC) $(CCFLAGS) $(BUILD)/testgen.o $(ALL_TEST_DEPS) $(TESTER_OBJS) $(GENATC_OBJS) -o $(BIN)/testgen $(LIB)
 
 clean:
 	rm -f $(BUILD)/*.o $(BIN)/test_see $(BIN)/test_z3solver $(BIN)/test_tester $(BIN)/test_genATC $(BIN)/test_e2e $(BUILD)/test_see.o $(BUILD)/test_z3solver.o $(BUILD)/test_tester.o $(BUILD)/test_genATC.o $(BUILD)/test_e2e.o

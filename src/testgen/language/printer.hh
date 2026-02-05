@@ -52,6 +52,7 @@ protected:
   // Statement visitors
   void visitAssign(const Assign &node) override;
   void visitAssume(const Assume &node) override;
+  void visitAssert(const Assert &node) override;
 
 public:
   Printer();

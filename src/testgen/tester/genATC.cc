@@ -1,11 +1,17 @@
 #include "genATC.hh"
-using namespace std;
+#include <iostream>
+
 // ============================================================================
 // ATCGenerator Implementation
 // ============================================================================
 
 ATCGenerator::ATCGenerator(const Spec *spec, TypeMap typeMap)
-    : spec(spec), typeMap(std::move(typeMap)) {}
+    : spec(spec), typeMap(std::move(typeMap)) {
+  std::cout << "Received Spec with " << spec->globals.size() << " globals, "
+            << spec->init.size() << " init statements, "
+            << spec->functions.size() << " functions, and "
+            << spec->blocks.size() << " blocks." << std::endl;
+}
 
 /**
  * Generate initialization statements from spec.global
@@ -67,6 +73,13 @@ ATCGenerator::convertExpr(const std::unique_ptr<Expr> &expr,
     String *str = dynamic_cast<String *>(expr.get());
     return std::make_unique<String>(str->value);
   }
+
+  // Handle Bool
+  else if (expr->exprType == ExprType::BOOL) {
+    Bool *b = dynamic_cast<Bool *>(expr.get());
+    return std::make_unique<Bool>(b->value);
+  }
+
   // Handle Set
   else if (expr->exprType == ExprType::SET) {
     Set *set = dynamic_cast<Set *>(expr.get());
@@ -452,9 +465,15 @@ vector<std::unique_ptr<Stmt>> ATCGenerator::genBlock(const Spec *spec,
 
   // Step 7: Generate postcondition assertion
   // assert(post) where primes are removed
-  if (block->call->response.expr) {
-    auto convertedPost =
-        convertExpr(block->call->response.expr, blockSymTable, suffix);
+  // if (block->call->response.expr) {
+  //   auto convertedPost =
+  //       convertExpr(block->call->response.expr, blockSymTable, suffix);
+  //   auto postWithoutPrimes = removePrimeNotation(convertedPost, primedVars);
+  //   blockStmts.push_back(
+  //       std::make_unique<Assert>(std::move(postWithoutPrimes)));
+  // }
+  if (block->post) {
+    auto convertedPost = convertExpr(block->post, blockSymTable, suffix);
     auto postWithoutPrimes = removePrimeNotation(convertedPost, primedVars);
     blockStmts.push_back(
         std::make_unique<Assert>(std::move(postWithoutPrimes)));
@@ -483,6 +502,8 @@ Program ATCGenerator::generate(const Spec *spec, SymbolTable *globalSymTable,
   for (size_t j = 0; j < testString.size(); j++) {
 
     for (size_t i = 0; i < spec->blocks.size(); i++) {
+      std::cout << "Processing block: " << spec->blocks[i]->name
+                << " against test string: " << testString[j] << std::endl;
       if (testString[j] != spec->blocks[i]->name) {
         continue;
       } else {

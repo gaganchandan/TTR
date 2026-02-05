@@ -1,0 +1,11 @@
+// Global variable
+y: int;
+
+// Init
+y := 0;
+
+// API specification
+f1:
+PRECONDITION: and(gt(x, 0), gt(z, 0))
+CALL: f1(x, z) ==> (OK, r)
+POSTCONDITION: eq(r, add(x, z))

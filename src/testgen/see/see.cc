@@ -78,7 +78,7 @@ unique_ptr<Expr> SEE::computePathConstraint(vector<Expr *> C) {
   if (C.empty()) {
     // No constraints, return true (represented as 1 == 1)
     vector<unique_ptr<Expr>> args;
-    args.push_back(make_unique<Num>(1));
+    args.push_back(make_unique<Bool>(true));
     args.push_back(make_unique<Num>(1));
     return make_unique<FuncCall>("Eq", std::move(args));
   }
@@ -234,12 +234,12 @@ bool SEE::isAPI(const FuncCall &fc) {
   // Built-in functions that are NOT API calls
   static const set<string> builtInFunctions = {
       // Arithmetic
-      "Add", "Sub", "Mul", "Div",
+      "add", "sub", "mul", "div",
       // Comparison
-      "Eq", "Lt", "Gt", "Le", "Ge", "Neq", "=", "==", "!=", "<>", "<", ">",
+      "eq", "lt", "gt", "le", "ge", "neq", "=", "==", "!=", "<>", "<", ">",
       "<=", ">=",
       // Logical
-      "And", "Or", "Not", "Implies", "and", "or", "not", "&&", "||", "!",
+      "and", "or", "not", "implies", "and", "or", "not", "&&", "||", "!",
       // Input
       "input",
       // Set operations

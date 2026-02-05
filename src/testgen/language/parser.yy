@@ -15,7 +15,7 @@ Spec* astRoot = nullptr;
 // Helper variables for building the AST
 std::vector<std::unique_ptr<Decl>> globals;
 std::vector<std::unique_ptr<Init>> inits;
-std::vector<std::unique_ptr<FuncDecl>> functions;
+std::vector<std::unique_ptr<APIFuncDecl>> functions;
 std::vector<std::unique_ptr<API>> apis;
 
 %}
@@ -34,7 +34,8 @@ std::vector<std::unique_ptr<API>> apis;
     std::vector<std::unique_ptr<TypeExpr>>* typeList;
     std::vector<std::pair<std::unique_ptr<Var>, std::unique_ptr<Expr>>>* mappings;
     Decl* decl;
-    FuncDecl* funcDecl;
+    APIFuncDecl* funcDecl;
+    Init* init;
     Spec* spec;
     API* api;
     HTTPResponseCode httpCode;
@@ -60,6 +61,7 @@ std::vector<std::unique_ptr<API>> apis;
 %type <typeList> type_list type_exprs
 %type <decl> global_decl
 %type <funcDecl> func_decl
+%type <init> init
 %type <api> api_block 
 %type <apiCall> api_call
 %type <expr> precondition postcondition
@@ -83,12 +85,21 @@ declarations:
         globals.push_back(std::unique_ptr<Decl>($2));
     }
     | declarations func_decl SEMICOLON {
-        functions.push_back(std::unique_ptr<FuncDecl>($2));
+        functions.push_back(std::unique_ptr<APIFuncDecl>($2));
+    }
+    | declarations init SEMICOLON {
+        inits.push_back(std::unique_ptr<Init>($2));
     }
     | declarations api_block {
         apis.push_back(std::unique_ptr<API>($2));
     }
     | /* empty */ {}
+    ;
+
+init:
+    IDENTIFIER COLON EQUALS expr {
+        $$ = new Init(*$1, std::unique_ptr<Expr>($4));
+    }
     ;
 
 global_decl:
@@ -110,7 +121,7 @@ func_decl:
             $3->pop_back();
         }
         
-        $$ = new FuncDecl(*$1, std::move(*$3), 
+        $$ = new APIFuncDecl(*$1, std::move(*$3), 
                           std::make_pair(HTTPResponseCode::OK_200, std::move(returnType)));
         delete $1;
         delete $3;

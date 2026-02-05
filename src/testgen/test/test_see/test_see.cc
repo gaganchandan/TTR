@@ -70,18 +70,18 @@ protected:
 
     statements.push_back(
         make_unique<Assign>(make_unique<Var>("z"),
-                            TestUtils::makeBinOp("Add", make_unique<Var>("x"),
+                            TestUtils::makeBinOp("add", make_unique<Var>("x"),
                                                  make_unique<Var>("y"))));
 
     statements.push_back(make_unique<Assume>(
-        TestUtils::makeBinOp("Eq",
-                             TestUtils::makeBinOp("Mul", make_unique<Var>("x"),
+        TestUtils::makeBinOp("eq",
+                             TestUtils::makeBinOp("mul", make_unique<Var>("x"),
                                                   make_unique<Var>("y")),
                              make_unique<Num>(3))));
 
     statements.push_back(
         make_unique<Assign>(make_unique<Var>("z"),
-                            TestUtils::makeBinOp("Add", make_unique<Var>("z"),
+                            TestUtils::makeBinOp("add", make_unique<Var>("z"),
                                                  make_unique<Num>(2))));
 
     statements.push_back(

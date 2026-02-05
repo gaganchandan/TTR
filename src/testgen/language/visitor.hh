@@ -28,6 +28,7 @@ class Spec;
 class Stmt;
 class Assign;
 class Assume;
+class Assert;
 
 class Program;
 
@@ -64,6 +65,7 @@ protected:
   // Statement visitors - to be implemented by concrete visitors
   virtual void visitAssign(const Assign &node) = 0;
   virtual void visitAssume(const Assume &node) = 0;
+  virtual void visitAssert(const Assert &node) = 0;
 
 public:
   // High-level visitors for complex structures

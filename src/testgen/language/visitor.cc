@@ -100,7 +100,13 @@ void Visitor::visit(const Stmt *node) {
     visitAssume(*dynamic_cast<const Assume *>(node));
     ;
     break;
-  default:
-    throw std::runtime_error("Unknown Stmt type in visitor");
+  // default:
+  //   throw std::runtime_error("Unknown Stmt type in visitor");
+  case StmtType::ASSERT:
+    visitAssert(*dynamic_cast<const Assert *>(node));
+    break;
+  case StmtType::DECL:
+    visitDecl(*dynamic_cast<const Decl *>(node));
+    break;
   }
 }

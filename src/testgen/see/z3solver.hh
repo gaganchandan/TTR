@@ -64,6 +64,7 @@ protected:
   // Statement visitor methods
   void visitAssign(const Assign &node) override;
   void visitAssume(const Assume &node) override;
+  void visitAssert(const Assert &node) override;
 
   // Declaration/High-level visitor methods
   z3::expr convertArg(const unique_ptr<Expr> &arg);

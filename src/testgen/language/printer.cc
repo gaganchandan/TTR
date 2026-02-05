@@ -55,6 +55,12 @@ void Printer::visitAssume(const Assume &node) {
   std::cout << ")";
 }
 
+void Printer::visitAssert(const Assert &node) {
+  std::cout << "assert(";
+  visit(node.expr.get());
+  std::cout << ")";
+}
+
 // High-level visitors
 void Printer::visitDecl(const Decl &node) {
   std::cout << node.name << ": ";
@@ -79,6 +85,11 @@ void Printer::visitAPI(const API &node) {
   printIndent();
   std::cout << "call: ";
   visitAPIcall(*node.call);
+  std::cout << endl;
+
+  printIndent();
+  std::cout << "post: ";
+  visit(node.post.get());
   std::cout << endl;
 
   dedent();
@@ -144,53 +155,11 @@ void Printer::visitSpec(const Spec &node) {
 
 void Printer::visitProgram(const Program &node) {
   std::cout << "=== Program ===" << endl;
+  std::cout << "Number of statements: " << node.statements.size() << endl;
   for (size_t i = 0; i < node.statements.size(); i++) {
     std::cout << "Statement " << i << ": ";
-    printStmt(node.statements[i].get());
+    visit(node.statements[i].get());
     std::cout << endl;
   }
   std::cout << "=== End Program ===" << endl;
-}
-
-// Convenience methods
-void Printer::printExpr(const Expr *expr) {
-  if (!expr) {
-    std::cout << "null";
-    return;
-  }
-  visit(expr);
-}
-
-void Printer::printStmt(const Stmt *stmt) {
-  if (!stmt) {
-    std::cout << "null";
-    return;
-  }
-
-  // Check if it's an Assert (not in base visitor yet)
-  // Assert uses ASSUME type but is a different class
-  const Assert *assertStmt = dynamic_cast<const Assert *>(stmt);
-  if (assertStmt) {
-    std::cout << "assert(";
-    if (assertStmt->expr) {
-      visit(assertStmt->expr.get());
-    }
-    std::cout << ")";
-    return;
-  }
-
-  // Try regular visitor dispatch
-  try {
-    visit(stmt);
-  } catch (const std::runtime_error &e) {
-    std::cout << "UnknownStmt";
-  }
-}
-
-void Printer::printTypeExpr(const TypeExpr *type) {
-  if (!type) {
-    std::cout << "null";
-    return;
-  }
-  visit(type);
 }

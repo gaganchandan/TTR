@@ -1,5 +1,8 @@
 #include "ast.hh"
+#include <cassert>
+#include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 TypeExpr::TypeExpr(TypeExprType typeExprType) : typeExprType(typeExprType) {}
 
@@ -161,7 +164,9 @@ bool SetType::isEqual(const TypeExpr &other) const {
 Expr::Expr(ExprType exprType) : exprType(exprType) {}
 
 // --- Atomic / Constant Expressions ---
-Bool::Bool(bool value) : Expr(ExprType::BOOL), value(value) {}
+Bool::Bool(bool value) : Expr(ExprType::BOOL), value(value) {
+  // throw std::runtime_error("Bool constructor called");
+}
 
 std::string Bool::toString() const { return value ? "true" : "false"; }
 

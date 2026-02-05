@@ -225,12 +225,14 @@ void Z3InputMaker::visitFuncCall(const FuncCall &node) {
   }
 
   // ========== Comparison Operations ==========
-  else if ((node.name == "eq" || node.name == "=" || node.name == "==") &&
+  else if ((node.name == "eq" || node.name == "=" || node.name == "==" ||
+            node.name == "Eq") &&
            node.args.size() == 2) {
     z3::expr left = convertArg(node.args[0]);
     z3::expr right = convertArg(node.args[1]);
     theStack.push(left == right);
-  } else if ((node.name == "neq" || node.name == "!=" || node.name == "<>") &&
+  } else if ((node.name == "neq" || node.name == "Neq" || node.name == "!=" ||
+              node.name == "<>") &&
              node.args.size() == 2) {
     z3::expr left = convertArg(node.args[0]);
     z3::expr right = convertArg(node.args[1]);
@@ -239,11 +241,11 @@ void Z3InputMaker::visitFuncCall(const FuncCall &node) {
     z3::expr left = convertArg(node.args[0]);
     z3::expr right = convertArg(node.args[1]);
     theStack.push(left < right);
-  } else if ((node.name == "lt" || node.name == ">") && node.args.size() == 2) {
+  } else if ((node.name == "gt" || node.name == ">") && node.args.size() == 2) {
     z3::expr left = convertArg(node.args[0]);
     z3::expr right = convertArg(node.args[1]);
     theStack.push(left > right);
-  } else if ((node.name == "gt" || node.name == "<=") &&
+  } else if ((node.name == "le" || node.name == "<=") &&
              node.args.size() == 2) {
     z3::expr left = convertArg(node.args[0]);
     z3::expr right = convertArg(node.args[1]);
@@ -553,6 +555,10 @@ void Z3InputMaker::visitAssign(const Assign &node) {
 
 void Z3InputMaker::visitAssume(const Assume &node) {
   throw runtime_error("Assume not supported in Z3 conversion");
+}
+
+void Z3InputMaker::visitAssert(const Assert &node) {
+  throw runtime_error("Assert not supported in Z3 conversion");
 }
 
 void Z3InputMaker::visitProgram(const Program &node) {
